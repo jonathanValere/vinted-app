@@ -69,17 +69,6 @@ router.get("/offers", async (req, res) => {
   }
 });
 
-// GET Afficher une annonce ------------------------
-router.get("/offers/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const offerFound = await Offer.findById(id).populate("owner");
-    res.status(200).json(offerFound);
-  } catch (error) {
-    res.status(404).json({ message: error.message });
-  }
-});
-
 // CREATE Créer une offre ---------------------------------
 router.post(
   "/offer/publish",
@@ -159,12 +148,20 @@ router.post(
   }
 );
 
-// Modifier une annonce ----------------------------
-router.put(
-  "/offer/:id/edit",
-  isAuthenticated,
-  fileUpload(),
-  async (req, res) => {
+router
+  .route("/offers/:id")
+  .get(async (req, res) => {
+    // GET Afficher une annonce ------------------------
+    try {
+      const { id } = req.params;
+      const offerFound = await Offer.findById(id).populate("owner");
+      res.status(200).json(offerFound);
+    } catch (error) {
+      res.status(404).json({ message: error.message });
+    }
+  })
+  .put(isAuthenticated, fileUpload(), async (req, res) => {
+    // Modifier une annonce ----------------------------
     try {
       const offerToModify = await Offer.findById(req.params.id).populate(
         "owner"
@@ -222,7 +219,13 @@ router.put(
     } catch (error) {
       return res.status(400).json({ message: error.message });
     }
-  }
-);
+  })
+  .delete((req, res) => {
+    try {
+      res.status(200).json({ message: "offer deleted" });
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  });
 
 module.exports = router;
