@@ -69,6 +69,17 @@ router.get("/offers", async (req, res) => {
   }
 });
 
+// GET Afficher une annonce ------------------------
+router.get("/offers/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const offerFound = await Offer.findById(id).populate("owner");
+    res.status(200).json(offerFound);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
+
 // CREATE Créer une offre ---------------------------------
 router.post(
   "/offer/publish",
