@@ -148,18 +148,19 @@ router.post(
   }
 );
 
+// GET Afficher une annonce ------------------------
+router.get("/offers/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const offerFound = await Offer.findById(id).populate("owner");
+    res.status(200).json(offerFound);
+  } catch (error) {
+    res.status(404).json({ message: error.message });
+  }
+});
+
 router
   .route("/offers/:id")
-  .get(async (req, res) => {
-    // GET Afficher une annonce ------------------------
-    try {
-      const { id } = req.params;
-      const offerFound = await Offer.findById(id).populate("owner");
-      res.status(200).json(offerFound);
-    } catch (error) {
-      res.status(404).json({ message: error.message });
-    }
-  })
   .put(isAuthenticated, fileUpload(), async (req, res) => {
     // Modifier une annonce ----------------------------
     try {
@@ -220,9 +221,11 @@ router
       return res.status(400).json({ message: error.message });
     }
   })
-  .delete((req, res) => {
+  .delete(isAuthenticated, async (req, res) => {
     try {
-      res.status(200).json({ message: "offer deleted" });
+      const { id } = req.params;
+      const offerDelete = await Offer.findByIdAndDelete(id);
+      res.status(200).json(offerDelete);
     } catch (error) {
       return res.status(400).json({ message: error.message });
     }
