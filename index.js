@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const cloudinary = require("cloudinary").v2;
+const nameDatabase = "vinted-app";
 const {
   apiKeyCloudinary,
   apiSecretCloudinary,
@@ -17,7 +18,17 @@ cloudinary.config({
   api_secret: apiSecretCloudinary,
 });
 
-mongoose.connect("mongodb://localhost:27017/vinted-app");
+// Connection à la DB --------------
+const connectToDatabase = async (DB) => {
+  try {
+    await mongoose.connect(`mongodb://localhost:27017/${DB}`);
+    console.log(`Connexion à la base de données ${DB}`);
+  } catch (error) {
+    console.error("Erreur de connexion à la base de données:", error.message);
+  }
+};
+
+connectToDatabase(nameDatabase);
 
 // Importer et utiliser mes routes
 const routesUser = require("./routes/user");
