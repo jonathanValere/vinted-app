@@ -78,7 +78,6 @@ router.post("/user/login", async (req, res) => {
     if (accountExist) {
       const newHash = generateHash(password, accountExist.salt);
       if (newHash === accountExist.hash) {
-        console.log(accountExist);
         return res.status(200).json({
           message: `Bon retour parmi nous, ${accountExist.account.username}!`,
         });
