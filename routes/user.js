@@ -18,24 +18,18 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
   try {
     //Récupération des éléments du body
     const { username, email, password, newsletter } = req.body;
-    const image = req.files;
-    // Gestion de l'avatar
-    let fileUploaded;
-    if (image.avatar.length === undefined) {
-      const fileConverted = convertToBase64(image.avatar);
-      fileUploaded = await cloudinary.uploader.upload(fileConverted, {
-        folder: "/vinted/users/",
-      });
-    }
+
     // Vérification que le champs username est renseigné
-    if (!username) {
-      return res.status(404).json({ message: "Username missing" });
+    if (!username || !email) {
+      return res
+        .status(403)
+        .json({ message: "Vous devez préciser un username et un email" });
     }
 
     // Vérification de l'existence dans la DB du mail renseigné
     const accountExist = await User.findOne({ email: email });
     if (accountExist) {
-      return res.status(404).json({ message: "This email already exists" });
+      return res.status(401).json({ message: "This email already exists" });
     } else {
       // lancement de la création du compte utilisateur
       // Création de mon salt
@@ -50,7 +44,6 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
         email: email,
         account: {
           username: username,
-          avatar: fileUploaded.secure_url,
         },
         newsletter: newsletter,
         token: token,
@@ -58,8 +51,19 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
         salt: salt,
       });
 
+      // Gestion de l'avatar
+      const image = req.files;
+      let fileUploaded = "";
+      if (image.avatar.length === undefined) {
+        const fileConverted = convertToBase64(image.avatar);
+        fileUploaded = await cloudinary.uploader.upload(fileConverted, {
+          folder: "/vinted/users/",
+        });
+        newUser.account.avatar = fileUploaded;
+      }
+
       await newUser.save();
-      return res.status(200).json({
+      return res.status(201).json({
         _id: newUser._id,
         token: newUser.token,
         account: newUser.account,
@@ -74,15 +78,23 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 router.post("/user/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "missing parameters" });
+    }
+
     const accountExist = await User.findOne({ email: email });
+
     if (accountExist) {
+      // Vérification que le mot de passe est bien renseigné
       const newHash = generateHash(password, accountExist.salt);
       if (newHash === accountExist.hash) {
         return res.status(200).json({
           message: `Bon retour parmi nous, ${accountExist.account.username}!`,
         });
       } else {
-        return res.status(400).json({ message: "WRONG" });
+        // Indiquer l'email et le password TOUJOURS !!!!!
+        return res.status(401).json({ message: "Email ou password incorrect" });
       }
     } else {
       return res.status(404).json({ message: "You must have an account" });
