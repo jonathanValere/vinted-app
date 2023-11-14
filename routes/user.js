@@ -14,6 +14,7 @@ const {
 // Importation du modèle User
 const User = require("../models/User");
 
+// Création d'un compte -------------------------------------
 router.post("/user/signup", fileUpload(), async (req, res) => {
   try {
     //Récupération des éléments du body
@@ -61,7 +62,9 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
         });
         newUser.account.avatar = fileUploaded;
       }
-
+      // Permet de valider les données entrées en fonction de leur type
+      await newUser.validate();
+      // Sauvegarder dans la DB
       await newUser.save();
       return res.status(201).json({
         _id: newUser._id,
