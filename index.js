@@ -33,6 +33,14 @@ app.use(routesUser);
 const routesOffer = require("./routes/offer");
 app.use(routesOffer);
 
+app.get("/", (req, res) => {
+  try {
+    res.status(200).json({ message: "Welcome to my website Vinted 🖐🏽" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 app.all("*", (req, res) => {
   res.status(404).json({ message: "Page not found 😱" });
 });
