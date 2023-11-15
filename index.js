@@ -35,6 +35,7 @@ app.all("*", (req, res) => {
   res.status(404).json({ message: "Page not found 😱" });
 });
 
+// Lancement du serveur
 app.listen(process.env.PORT, () => {
   console.log("Server on fire 🔥");
 });
