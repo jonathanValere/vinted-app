@@ -30,8 +30,8 @@ connectToDatabase();
 // Importer et utiliser mes routes
 const routesUser = require("./routes/user");
 app.use(routesUser);
-const routeOffer = require("./routes/offer");
-app.use(routeOffer);
+const routesOffer = require("./routes/offer");
+app.use(routesOffer);
 
 app.all("*", (req, res) => {
   res.status(404).json({ message: "Page not found 😱" });
