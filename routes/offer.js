@@ -80,35 +80,6 @@ router.post(
         req.body;
 
       if (title.length < 50 && description.length < 500 && price < 100000) {
-        // Gestion des images -------
-        const images = req.files;
-        // Conversion du fichier "buffer" en élément pouvant être importé dans cloudinary
-        const listImages = [];
-        let resultUploadImage = "";
-        if (images) {
-          if (images.picture.length === undefined) {
-            const fileConverted = convertToBase64(images.picture);
-            const fileUploaded = await cloudinary.uploader.upload(
-              fileConverted,
-              {
-                folder: "/vinted/offers/",
-              }
-            );
-            resultUploadImage = fileUploaded;
-          } else {
-            for (const image of images.picture) {
-              const fileConverted = convertToBase64(image);
-              const fileUploaded = await cloudinary.uploader.upload(
-                fileConverted,
-                {
-                  folder: "/vinted/offers/",
-                }
-              );
-              listImages.push(fileUploaded);
-              resultUploadImage = listImages;
-            }
-          }
-        }
         // owner provient du middleware isAuthenticated
         const owner = req.owner;
         // Créer une nouvelle offre
@@ -133,9 +104,40 @@ router.post(
               EMPLACEMENT: city,
             },
           ],
-          product_image: resultUploadImage, // Type Object
+          // Type Object
           owner: owner,
         });
+
+        // Gestion des images -------
+        if (req.files.picture) {
+          // Conversion du fichier "buffer" en élément pouvant être importé dans cloudinary
+          const fileConverted = convertToBase64(req.files.picture);
+          const fileUploaded = await cloudinary.uploader.upload(fileConverted, {
+            folder: `/vinted/offers/${newOffer._id}`,
+          });
+          newOffer.product_image = fileUploaded;
+        }
+
+        // Gestion de plusieurs images
+        const listImages = [];
+
+        if (req.files.pictures) {
+          for (const image of req.files.pictures) {
+            // image est convertie pour son insertion dans cloudinary
+            const fileConverted = convertToBase64(image);
+            const fileUploaded = await cloudinary.uploader.upload(
+              fileConverted,
+              {
+                folder: `/vinted/offers/${newOffer._id}`,
+              }
+            );
+            // Ajout de l'image dans le tableau listImages
+            listImages.push(fileUploaded);
+          }
+          // Affecter le tableau listImages à la clé product_pictures de la nouvelle offre
+          newOffer.product_pictures = listImages;
+        }
+
         // Sauvegarder dans la DB
         await newOffer.save();
         return res.status(200).json(newOffer);
