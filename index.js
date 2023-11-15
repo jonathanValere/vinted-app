@@ -1,7 +1,9 @@
 require("dotenv").config(); // Permet d'activer les variables d'environnement qui se trouvent dans le fichier .env
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const app = express();
+app.use(cors());
 const cloudinary = require("cloudinary").v2;
 
 app.use(express.json());
