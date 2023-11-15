@@ -12,7 +12,7 @@ cloudinary.config({
   api_key: process.env.API_KEY_CLOUDINARY,
   api_secret: process.env.API_SECRET_CLOUDINARY,
 });
-// ceci est un test
+
 // Connection à la DB --------------
 const connectToDatabase = async () => {
   try {
