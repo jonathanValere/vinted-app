@@ -58,7 +58,7 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
       if (image.avatar.length === undefined) {
         const fileConverted = convertToBase64(image.avatar);
         fileUploaded = await cloudinary.uploader.upload(fileConverted, {
-          folder: "/vinted/users/",
+          folder: `/vinted/users/${newUser._id}`,
         });
         newUser.account.avatar = fileUploaded;
       }
