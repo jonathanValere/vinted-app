@@ -3,11 +3,8 @@ const fileUpload = require("express-fileupload");
 const cloudinary = require("cloudinary").v2;
 const { convertToBase64 } = require("../utils/functions");
 const router = express.Router();
-const {
-  generateHash,
-  generateSalt,
-  generateToken,
-} = require("../utils/functions");
+const uid2 = require("uid2");
+const { generateHash } = require("../utils/functions");
 // Module pour créer le salt "uid2"
 // const uid2 = require("uid2");
 
@@ -20,7 +17,7 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
     //Récupération des éléments du body
     const { username, email, password, newsletter } = req.body;
 
-    // Vérification que le champs username est renseigné
+    // Vérification que les champs username ET email sont renseignés
     if (!username || !email) {
       return res
         .status(403)
@@ -34,11 +31,11 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
     } else {
       // lancement de la création du compte utilisateur
       // Création de mon salt
-      const salt = generateSalt(16);
-      // Création du hash
+      const salt = uid2(16);
+      // Création du hash (generateHash provient de utils/functions.js)
       const hash = generateHash(password, salt);
       // Création du token
-      const token = generateToken(16);
+      const token = uid2(16);
 
       // Création d'un compte utilisateur
       const newUser = new User({
@@ -55,6 +52,7 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
       // Gestion de l'avatar
       const image = req.files;
       let fileUploaded = "";
+      console.log(image.avatar);
       if (image.avatar.length === undefined) {
         const fileConverted = convertToBase64(image.avatar);
         fileUploaded = await cloudinary.uploader.upload(fileConverted, {
