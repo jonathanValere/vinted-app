@@ -114,6 +114,7 @@ router.post(
           const fileConverted = convertToBase64(req.files.picture);
           const fileUploaded = await cloudinary.uploader.upload(fileConverted, {
             folder: `/vinted/offers/${newOffer._id}`,
+            use_filename: true,
           });
           newOffer.product_image = fileUploaded;
         }
@@ -161,15 +162,17 @@ router.get("/offers/:id", async (req, res) => {
   }
 });
 
-router
-  .route("/offers/:id")
-  .put(isAuthenticated, fileUpload(), async (req, res) => {
-    // Modifier une annonce ----------------------------
+// Modifier une Offre ---------------------------
+router.put(
+  "/offers/:id/edit",
+  isAuthenticated,
+  fileUpload(),
+  async (req, res) => {
     try {
-      const offerToModify = await Offer.findById(req.params.id).populate(
-        "owner"
-      );
-      if (offerToModify) {
+      const offerToModify = await Offer.findById(req.params.id);
+      if (!offerToModify) {
+        return res.status(404).json({ message: "Offer not found." });
+      } else {
         // récupérer les éléments du body
         const {
           title,
@@ -181,9 +184,11 @@ router
           size,
           color,
         } = req.body;
+
         if (title) offerToModify.product_name = title;
         if (description) offerToModify.product_description = description;
         if (price) offerToModify.product_price = price;
+
         for (const detail of offerToModify.product_details) {
           if (detail.MARQUE && brand) detail.MARQUE = brand;
           if (detail.EMPLACEMENT && city) detail.EMPLACEMENT = city;
@@ -191,46 +196,70 @@ router
           if (detail.TAILLE && size) detail.TAILLE = size;
           if (detail.COULEUR && color) detail.COULEUR = color;
         }
-        // Partie concernant l'ajout d'une/des image(s) ----------
-        const images = req.files;
-        // vérifie si le champs picture est renseigné
-        if (images) {
-          // Vérifie si le champs contient uniquement une image
-          if (images.picture.length === undefined) {
-            const fileConverted = convertToBase64(images.picture);
-            // const fileUploaded = await cloudinary.uploader.upload(
-            //   fileConverted,
-            //   {
-            //     folder: "/vinted/offers/",
-            //   }
-            // );
-            // offerToModify.product_image += fileUploaded;
-            console.log(offerToModify);
-            // await offerToModify.save();
-          } else {
-            // Partie concernant plusieurs images
-            // for (const image of images.picture) {
-            //   const fileConverted = convertToBase64(images.picture.image);
-            // }
-          }
-        }
-        // await offerToModify.save();
-        return res.status(200).json(offerToModify);
+
+        res.status(200).json({ message: "coucou" });
+      }
+    } catch (error) {
+      res.status(404).json({ message: error.message });
+    }
+  }
+);
+
+//       // Partie concernant l'ajout d'une/des image(s) ----------
+//       const images = req.files;
+//       // vérifie si le champs picture est renseigné
+//       if (images) {
+//         // Vérifie si le champs contient uniquement une image
+//         if (images.picture.length === undefined) {
+//           const fileConverted = convertToBase64(images.picture);
+//           // const fileUploaded = await cloudinary.uploader.upload(
+//           //   fileConverted,
+//           //   {
+//           //     folder: "/vinted/offers/",
+//           //   }
+//           // );
+//           // offerToModify.product_image += fileUploaded;
+//           console.log(offerToModify);
+//           // await offerToModify.save();
+//         } else {
+//           // Partie concernant plusieurs images
+//           // for (const image of images.picture) {
+//           //   const fileConverted = convertToBase64(images.picture.image);
+//           // }
+//         }
+//       }
+//       // await offerToModify.save();
+//       return res.status(200).json(offerToModify);
+//     } else {
+//       return res.status(404).json({ message: "Offer not found" });
+//     }
+//   } catch (error) {
+//     return res.status(400).json({ message: error.message });
+//   }
+// })
+router.delete(
+  "/offers/:id",
+  isAuthenticated,
+  fileUpload(),
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const offerToDelete = await Offer.findById(id);
+      if (!offerToDelete) {
+        return res.status(404).json({ message: "Offer doesn't exist." });
       } else {
-        return res.status(404).json({ message: "Offer not found" });
+        // Récupération du public_id de l'image afin de supprimer l'image de cloudinary
+        const publicIdImage = offerToDelete.product_image.public_id;
+        // suppression de l'image
+        await cloudinary.uploader.destroy(publicIdImage);
+        // suppression de l'offre
+        await offerToDelete.deleteOne();
+        return res.status(200).json({ message: "Offer deleted." });
       }
     } catch (error) {
       return res.status(400).json({ message: error.message });
     }
-  })
-  .delete(isAuthenticated, async (req, res) => {
-    try {
-      const { id } = req.params;
-      const offerDelete = await Offer.findByIdAndDelete(id);
-      res.status(200).json(offerDelete);
-    } catch (error) {
-      return res.status(400).json({ message: error.message });
-    }
-  });
+  }
+);
 
 module.exports = router;

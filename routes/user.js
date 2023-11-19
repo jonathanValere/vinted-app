@@ -2,11 +2,9 @@ const express = require("express");
 const fileUpload = require("express-fileupload");
 const cloudinary = require("cloudinary").v2;
 const { convertToBase64 } = require("../utils/functions");
+const { generateHash } = require("../utils/functions");
 const router = express.Router();
 const uid2 = require("uid2");
-const { generateHash } = require("../utils/functions");
-// Module pour créer le salt "uid2"
-// const uid2 = require("uid2");
 
 // Importation du modèle User
 const User = require("../models/User");

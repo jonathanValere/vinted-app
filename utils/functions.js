@@ -1,7 +1,5 @@
 // Fichier functions.js
 // On y retrouve toutes les fonctions de mon projet
-// Module pour créer le salt "uid2"
-const uid2 = require("uid2");
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
 
