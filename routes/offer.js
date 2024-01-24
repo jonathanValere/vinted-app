@@ -34,26 +34,35 @@ router.get("/offers", async (req, res) => {
     // Filtrage ordre croissant/décroissant du prix
     if (!page) {
       if (!sort) {
-        result = await Offer.find(filter).limit(limit);
+        result = await Offer.find(filter).populate("owner").limit(limit);
       } else {
         result =
           sort === "price-asc"
-            ? await Offer.find(filter).sort({ product_price: 1 }).limit(limit)
-            : await Offer.find(filter).sort({ product_price: -1 }).limit(limit);
+            ? await Offer.find(filter)
+                .populate("owner")
+                .sort({ product_price: 1 })
+                .limit(limit)
+            : await Offer.find(filter)
+                .populate("owner")
+                .sort({ product_price: -1 })
+                .limit(limit);
       }
     } else {
       if (!sort) {
         result = await Offer.find(filter)
+          .populate("owner")
           .limit(limit)
           .skip((page - 1) * limit);
       } else {
         result =
           sort === "price-asc"
             ? await Offer.find(filter)
+                .populate("owner")
                 .sort({ product_price: 1 })
                 .limit(limit)
                 .skip((page - 1) * limit)
             : await Offer.find(filter)
+                .populate("owner")
                 .sort({ product_price: -1 })
                 .limit(limit)
                 .skip((page - 1) * limit);
@@ -62,7 +71,6 @@ router.get("/offers", async (req, res) => {
 
     // Le nombre d'offres trouvées
     const counter = result.length;
-
     res.status(200).json({ count: counter, offers: result });
   } catch (error) {
     res.status(400).json({ message: error.message });

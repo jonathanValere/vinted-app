@@ -50,7 +50,6 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
       // Gestion de l'avatar
       const image = req.files;
       let fileUploaded = "";
-      console.log(image.avatar);
       if (image.avatar.length === undefined) {
         const fileConverted = convertToBase64(image.avatar);
         fileUploaded = await cloudinary.uploader.upload(fileConverted, {
