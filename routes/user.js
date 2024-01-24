@@ -47,16 +47,19 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
         salt: salt,
       });
 
-      // Gestion de l'avatar
-      const image = req.files;
-      let fileUploaded = "";
-      if (image.avatar.length === undefined) {
-        const fileConverted = convertToBase64(image.avatar);
-        fileUploaded = await cloudinary.uploader.upload(fileConverted, {
-          folder: `/vinted/users/${newUser._id}`,
-        });
-        newUser.account.avatar = fileUploaded;
-      }
+      // // Gestion de l'avatar ------------------------
+      // console.log(req.files);
+      // const image = req.files;
+      // let fileUploaded = "";
+      // if (image.avatar.length === undefined) {
+      //   const fileConverted = convertToBase64(image.avatar);
+      //   fileUploaded = await cloudinary.uploader.upload(fileConverted, {
+      //     folder: `/vinted/users/${newUser._id}`,
+      //   });
+      //   newUser.account.avatar = fileUploaded;
+      // }
+      // ------------------------------------------
+
       // Permet de valider les données entrées en fonction de leur type
       await newUser.validate();
       // Sauvegarder dans la DB
