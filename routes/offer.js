@@ -160,7 +160,7 @@ router.post(
 );
 
 // GET Afficher une annonce ------------------------
-router.get("/offers/:id", async (req, res) => {
+router.get("/offer/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const offerFound = await Offer.findById(id).populate("owner");
