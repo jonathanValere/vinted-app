@@ -19,7 +19,12 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
     if (!username || !email) {
       return res
         .status(403)
-        .json({ message: "Vous devez préciser un username et un email" });
+        .json({ message: "You must enter a username and email" });
+    }
+
+    //Vérification qu'il y a un mot de passe
+    if (!password) {
+      return res.status(403).json({ message: "You must enter a password" });
     }
 
     // Vérification de l'existence dans la DB du mail renseigné
