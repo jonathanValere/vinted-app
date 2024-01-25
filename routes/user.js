@@ -89,18 +89,21 @@ router.post("/user/login", async (req, res) => {
       return res.status(400).json({ message: "missing parameters" });
     }
 
-    const accountExist = await User.findOne({ email: email });
+    const user = await User.findOne({ email: email });
 
-    if (accountExist) {
+    if (user) {
       // Vérification que le mot de passe est bien renseigné
-      const newHash = generateHash(password, accountExist.salt);
-      if (newHash === accountExist.hash) {
+      const newHash = generateHash(password, user.salt);
+      if (newHash === user.hash) {
         return res.status(200).json({
-          message: `Bon retour parmi nous, ${accountExist.account.username}!`,
+          token: user.token,
+          // message: `Bon retour parmi nous, ${accountExist.account.username}!`,
         });
       } else {
         // Indiquer l'email et le password TOUJOURS !!!!!
-        return res.status(401).json({ message: "Email ou password incorrect" });
+        return res
+          .status(401)
+          .json({ message: "Email ou/et password incorrect" });
       }
     } else {
       return res.status(404).json({ message: "You must have an account" });
