@@ -13,7 +13,7 @@ router.get("/offers", async (req, res) => {
   try {
     const filter = {};
     let result = "";
-    const limit = 3;
+    const limit = 50;
     const { title, priceMin, priceMax, sort, page } = req.query;
     // Filtrage par titre
     if (title) filter.product_name = new RegExp(title, "i");
