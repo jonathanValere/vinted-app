@@ -84,9 +84,18 @@ router.post(
   fileUpload(),
   async (req, res) => {
     try {
-      const { title, description, price, condition, city, brand, size, color } =
-        req.body;
-
+      const {
+        title,
+        description,
+        price,
+        condition,
+        city,
+        brand,
+        size,
+        color,
+        change,
+      } = req.body;
+      console.log(req.body);
       if (title.length < 50 && description.length < 500 && price < 100000) {
         // owner provient du middleware isAuthenticated
         const owner = req.owner;
@@ -95,6 +104,7 @@ router.post(
           product_name: title,
           product_description: description,
           product_price: price,
+          product_change: change,
           product_details: [
             {
               MARQUE: brand,
@@ -191,11 +201,13 @@ router.put(
           brand,
           size,
           color,
+          change,
         } = req.body;
 
         if (title) offerToModify.product_name = title;
         if (description) offerToModify.product_description = description;
         if (price) offerToModify.product_price = price;
+        if (change) offerToModify.product_change = change;
 
         for (const detail of offerToModify.product_details) {
           if (detail.MARQUE && brand) detail.MARQUE = brand;
@@ -205,7 +217,7 @@ router.put(
           if (detail.COULEUR && color) detail.COULEUR = color;
         }
 
-        res.status(200).json({ message: "coucou" });
+        res.status(200).json({ message: "Changed!" });
       }
     } catch (error) {
       res.status(404).json({ message: error.message });
@@ -213,7 +225,7 @@ router.put(
   }
 );
 
-//       // Partie concernant l'ajout d'une/des image(s) ----------
+//       // Partie concernant l'ajout d'une/des image(s) pour la modification ----------
 //       const images = req.files;
 //       // vérifie si le champs picture est renseigné
 //       if (images) {
@@ -245,6 +257,7 @@ router.put(
 //     return res.status(400).json({ message: error.message });
 //   }
 // })
+
 router.delete(
   "/offers/:id",
   isAuthenticated,

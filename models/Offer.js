@@ -21,6 +21,7 @@ const offerSchema = mongoose.Schema(
       type: Number,
       max: 100000,
     },
+    product_change: Boolean,
     product_details: Array,
     product_image: Object,
     product_pictures: Array,
