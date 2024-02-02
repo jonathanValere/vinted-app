@@ -74,7 +74,6 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
       await newUser.validate();
       // Sauvegarder dans la DB
       await newUser.save();
-      console.log(newUser);
       return res.status(201).json({
         _id: newUser._id,
         token: newUser.token,
