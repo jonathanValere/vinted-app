@@ -2,6 +2,9 @@ require("dotenv").config(); // Permet d'activer les variables d'environnement qu
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const fileUpload = require("express-fileupload");
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 const app = express();
 app.use(cors());
 const cloudinary = require("cloudinary").v2;
@@ -33,11 +36,31 @@ app.use(routesUser);
 const routesOffer = require("./routes/offer");
 app.use(routesOffer);
 
+// Route vers la Homepage ----------
 app.get("/", (req, res) => {
   try {
     res.status(200).json({ message: "Welcome to my website Vinted 🖐🏽" });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+// Route vers le paiement ---------------
+app.post("/payment", fileUpload(), async (req, res) => {
+  try {
+    // Stocker le token de Stripe
+    const { stripeToken, amount, description } = req.body;
+    // Créer la transaction
+    const chargeObject = await stripe.charges.create({
+      amount: amount * 100,
+      currency: "eur",
+      description: description,
+      source: stripeToken,
+    });
+    // Renvoyer le status du paiement
+    res.status(200).json(chargeObject.status);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 

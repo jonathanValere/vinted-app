@@ -95,7 +95,7 @@ router.post(
         color,
         change,
       } = req.body;
-      console.log(req.body);
+
       if (title.length < 50 && description.length < 500 && price < 100000) {
         // owner provient du middleware isAuthenticated
         const owner = req.owner;
